@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Plot from './Plot'; // Artık bu dosya var, hata vermeyecek!
+import Plot from './Plot';
 import Flower from './Flower';
 import Modal from './Modal';
 import { flowers } from '../data/flowers';
@@ -39,16 +39,27 @@ const GardenGrid = () => {
     <>
       <h1 style={{ textAlign: 'center', textShadow: '2px 2px #000' }}>Duygu'nun Bahçesi</h1>
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${cols}, 80px)`,
-        gridTemplateRows: `repeat(${rows}, 80px)`,
-        gap: '4px',
-        padding: '16px',
-        background: '#4a3b2a',
-        borderRadius: '8px',
-        boxShadow: '0 10px 20px rgba(0,0,0,0.5)'
+        width: '100vw', 
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(to bottom, #2a2335 0%, #1a1325 100%)' 
       }}>
-        {renderGrid()}
+        
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${cols}, 80px)`,
+          gridTemplateRows: `repeat(${rows}, 80px)`,
+          gap: '4px',
+          padding: '20px',
+          background: '#5d4037',
+          border: '8px solid #3e2723',
+          borderRadius: '12px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.8)'
+        }}>
+          {renderGrid()}
+        </div>
       </div>
 
       <Modal flower={selectedFlower} onClose={() => setSelectedFlower(null)} />

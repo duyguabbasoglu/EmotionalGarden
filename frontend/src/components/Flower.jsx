@@ -1,23 +1,6 @@
 import React from 'react';
 
 const Flower = ({ type, onClick }) => {
-  const pixelArtStyle = {
-    width: '4px',
-    height: '4px',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%) scale(4)',
-    backgroundColor: 'transparent',
-    boxShadow: `
-      0px 0px #2d6a4f, 
-      -1px 1px #2d6a4f, 1px 1px #2d6a4f,
-      0px 2px #2d6a4f, 0px 3px #1b4332,
-      -2px -1px #d90429, 2px -1px #d90429, /* Meyveler */
-      0px -2px #d90429
-    `
-  };
-
   return (
     <div 
       className="flower-container" 
@@ -25,26 +8,89 @@ const Flower = ({ type, onClick }) => {
       style={{ 
         width: '100%', height: '100%', 
         position: 'relative', cursor: 'pointer',
-        transition: 'transform 0.1s'
+        animation: 'float 3s ease-in-out infinite'
       }}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
     >
-      <div style={pixelArtStyle} />
-      {/* Hover Tooltip */}
-      <div className="tooltip" style={{
-        position: 'absolute', bottom: '110%', left: '50%', 
-        transform: 'translateX(-50%)', 
-        background: 'rgba(0,0,0,0.8)', color: '#fff', 
-        padding: '4px 8px', fontSize: '14px', borderRadius: '4px',
-        pointerEvents: 'none', whiteSpace: 'nowrap',
-        opacity: 0, transition: 'opacity 0.2s'
+      {/* 12. kokina */}
+      <div style={{
+        position: 'absolute',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%) scale(0.25) rotate(-15deg)',
+        pointerEvents: 'none'
       }}>
-        {type.name}
+        {/* leaves */}
+        {[...Array(5)].map((_, i) => (
+          <div key={`leaf-${i}`} style={{
+            position: 'absolute',
+            width: '60px', height: '20px',
+            background: 'linear-gradient(to right, #1a472a, #2d6a4f)',
+            borderRadius: '80% 0 80% 0',
+            transformOrigin: 'center left',
+            transform: `rotate(${i * 72}deg) translateX(10px)`,
+            boxShadow: '1px 1px 3px rgba(0,0,0,0.2)'
+          }} />
+        ))}
+        {/* fruits */}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {[...Array(7)].map((_, i) => (
+            <div key={`berry-${i}`} style={{
+              position: 'absolute',
+              width: '18px', height: '18px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 30% 30%, #ff4d4d 0%, #d90429 60%)',
+              transform: `translate(${Math.cos(i)*15}px, ${Math.sin(i)*15}px)`,
+              boxShadow: '1px 1px 5px rgba(0,0,0,0.3)'
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* chatbox */}
+      <div className="chatbox">
+        <strong style={{ display: 'block', fontSize: '14px', marginBottom: '4px', color: '#d90429' }}>
+          {type.name}
+        </strong>
+        <span style={{ fontSize: '11px', color: '#555', lineHeight: '1.2', display: 'block' }}>
+          {type.description}
+        </span>
       </div>
       
+      {/* special css */}
       <style>{`
-        .flower-container:hover .tooltip { opacity: 1; }
+        .chatbox {
+          position: absolute;
+          bottom: 80%; 
+          left: 50%;
+          transform: translateX(-50%) scale(0.5);
+          width: 160px;
+          background: #fff;
+          color: #333;
+          padding: 12px;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          text-align: center;
+          font-family: 'Segoe UI', sans-serif;
+          pointer-events: none;
+          z-index: 20;
+          opacity: 0;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chatbox::after {
+          content: '';
+          position: absolute;
+          top: 100%; left: 50%;
+          margin-left: -6px;
+          border-width: 6px;
+          border-style: solid;
+          border-color: #fff transparent transparent transparent;
+        }
+
+        .flower-container:hover .chatbox {
+          opacity: 1;
+          bottom: 100%;
+          transform: translateX(-50%) scale(1);
+        }
       `}</style>
     </div>
   );
