@@ -18,8 +18,8 @@ const GardenGrid = () => {
         const isEven = (r + c) % 2 === 0;
 
         grid.push(
-          <Plot 
-            key={`${r}-${c}`} 
+          <Plot
+            key={`${r}-${c}`}
             isEven={isEven}
             onClick={() => flowerHere && setSelectedFlower(flowerHere)}
           >
@@ -39,14 +39,14 @@ const GardenGrid = () => {
     <>
       <h1 style={{ textAlign: 'center', textShadow: '2px 2px #000' }}>Duygu'nun Bahçesi</h1>
       <div style={{
-        width: '100vw', 
+        width: '100vw',
         height: '100vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: 'linear-gradient(to bottom, #2a2335 0%, #1a1325 100%)' 
+        background: 'linear-gradient(to bottom, #2a2335 0%, #1a1325 100%)'
       }}>
-        
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, 80px)`,
