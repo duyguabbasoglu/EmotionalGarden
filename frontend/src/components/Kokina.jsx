@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import FlowerLoader from './FlowerLoader';
 const random = (min, max) => Math.random() * (max - min) + min;
 
 
@@ -101,56 +102,11 @@ const Kokina = () => {
       position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' 
     }}>
       
-      {/* loading screen */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        zIndex: 9999,
-        background: 'rgba(0, 0, 0, 0.3)', 
-        backdropFilter: 'blur(8px)', 
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-        opacity: loading ? 1 : 0,
-        transition: 'opacity 0.6s ease',
-        pointerEvents: loading ? 'auto' : 'none'
-      }}>
-        
-        {/* title */}
-        <h2 style={{
-          fontFamily: "'VT323', monospace",
-          color: '#fff', fontSize: '38px', letterSpacing: '3px',
-          margin: '0 0 20px 0', 
-          textShadow: '0 0 15px rgba(255, 255, 255, 0.8)'
-        }}>
-          Çiçeğiniz hazırlanıyor...
-        </h2>
-
-        {/* progress bar */}
-        <div style={{
-          width: '350px', height: '30px',
-          border: '3px solid #fff',
-          borderRadius: '50px',
-          padding: '4px', 
-          background: 'rgba(0,0,0,0.5)', 
-          boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-        }}>
-          
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            borderRadius: '50px',
-            background: '#fff',
-            boxShadow: '0 0 15px rgba(255, 255, 255, 0.9)',
-            transition: 'width 0.06s linear'
-          }} />
-        </div>
-        
-        <div style={{ 
-          color: '#fff', marginTop: '15px', 
-          fontFamily: "'VT323', monospace", fontSize: '22px',
-          textShadow: '0 0 5px #fff'
-        }}>
-          %{Math.floor(progress)}
-        </div>
-      </div>
+      <FlowerLoader
+        loading={loading}
+        progress={progress}
+        message="Çiçeğiniz hazırlanıyor..."
+      />
 
       <FlowersLayer bloomed={bloomed} />
 

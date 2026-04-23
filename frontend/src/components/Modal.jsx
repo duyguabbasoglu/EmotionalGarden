@@ -1,13 +1,19 @@
 import React from 'react';
 import Kokina from './Kokina';
 import Kasimpati from './Kasimpati';
-import Kardelen from './Kardelen';
+import Karanfil from './Karanfil';
+import Cigdem from './Cigdem';
+import Nergis from './Nergis';
+import Papatya from './Papatya';
 
 // flower mapping
 const FLOWER_COMPONENTS = {
   "Kokina": Kokina,
   "Kasımpatı": Kasimpati,
-  "Kardelen": Kardelen,
+  "Karanfil": Karanfil,
+  "Çiğdem": Cigdem,
+  "Nergis": Nergis,
+  "Papatya": Papatya,
 };
 
 const Modal = ({ flower, onClose }) => {
@@ -45,10 +51,25 @@ const Modal = ({ flower, onClose }) => {
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}
         onMouseEnter={(e) => {
-          if (flower.name === 'Kardelen') {
+          if (flower.name === 'Çiğdem') {
+            e.target.style.background = '#5b2d8e';
+            e.target.style.color = '#fff';
+            e.target.style.borderColor = '#5b2d8e';
+          } else if (flower.name === 'Karanfil') {
             e.target.style.background = '#fff';
-            e.target.style.color = '#1B4332';
+            e.target.style.color = '#a63b50';
             e.target.style.borderColor = '#fff';
+          } else if (flower.name === 'Kokina') {
+            e.target.style.background = '#d90429';
+            e.target.style.borderColor = '#d90429';
+          } else if (flower.name === 'Nergis') {
+            e.target.style.background = '#ffe033';
+            e.target.style.color = '#5a3e00';
+            e.target.style.borderColor = '#ffe033';
+          } else if (flower.name === 'Papatya') {
+            e.target.style.background = '#ffffff';
+            e.target.style.color = '#e89500';
+            e.target.style.borderColor = '#ffffff';
           } else {
             e.target.style.background = '#d90429';
             e.target.style.borderColor = '#d90429';

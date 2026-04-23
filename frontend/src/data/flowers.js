@@ -1,14 +1,48 @@
 export const flowers = [
   {
     id: 1,
-    name: "Kardelen",
+    name: "Karanfil",
     month: "January",
-    description: "Karların arasından doğan umut. Yeni başlangıçların simgesi.",
+    description: "Sevgi ve hatıraları simgeler; " +
+      "'tanrıların çiçeği' olarak da anılır.",
     colors: {
-      primary: "#FFFFFF",
-      secondary: "#1B4332"
+      primary: "#e85a7f",
+      secondary: "#2d6a4f"
     },
     position: { row: 3, col: 5 }
+  },
+  {
+    id: 2,
+    name: "Çiğdem",
+    month: "February",
+    description: "Baharın müjdecisi! Umut ve yenilenmeyi temsil eder.",
+    colors: {
+      primary: "#9d4edd",
+      secondary: "#2d6a4f"
+    },
+    position: { row: 1, col: 2 }
+  },
+  {
+    id: 3,
+    name: "Nergis",
+    month: "March",
+    description: "Yeni başlangıçları, şansı ve refahı simgeler.",
+    colors: {
+      primary: "#ffe033",
+      secondary: "#ff8c00"
+    },
+    position: { row: 2, col: 1 }
+  },
+  {
+    id: 4,
+    name: "Papatya",
+    month: "April",
+    description: "Masumiyeti, saflığı ve gerçek sevgiyi simgeler.",
+    colors: {
+      primary: "#ffffff",
+      secondary: "#e89500"
+    },
+    position: { row: 0, col: 4 }
   },
   {
     id: 12,
