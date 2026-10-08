@@ -7,7 +7,11 @@ import React from 'react';
  *   progress   {number}  — 0-100
  *   message    {string}  — e.g. "Papatyalar açıyor..."
  *   glowColor  {string}  — CSS color for the text/bar glow  (default: '#fff')
- *   barStyle   {object}  — extra inline styles for the progress bar fill
+ *   barStyle   {object}  — extra inline styles for the progress bar fill.
+ *                         One flat accent colour per flower, please: these
+ *                         used to be three-stop gradients and twelve of
+ *                         them together read as a rainbow rather than as
+ *                         twelve flowers.
  */
 const FlowerLoader = ({
   loading,
@@ -22,21 +26,23 @@ const FlowerLoader = ({
     background: 'rgba(0,0,0,0.3)',
     backdropFilter: 'blur(8px)',
     display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+    padding: '0 24px', boxSizing: 'border-box', textAlign: 'center',
     opacity: loading ? 1 : 0,
     transition: 'opacity 0.6s ease',
     pointerEvents: loading ? 'auto' : 'none',
   }}>
     <h2 style={{
       fontFamily: "'VT323', monospace",
-      color: '#fff', fontSize: '38px', letterSpacing: '3px',
-      margin: '0 0 20px 0',
+      color: '#fff', fontSize: 'clamp(24px, 7vw, 38px)', letterSpacing: '3px',
+      margin: '0 0 20px 0', maxWidth: '100%',
       textShadow: `0 0 15px ${glowColor}`,
     }}>
       {message}
     </h2>
 
     <div style={{
-      width: '350px', height: '30px',
+      width: 'min(350px, 100%)', height: '30px',
+      boxSizing: 'border-box',
       border: '3px solid #fff',
       borderRadius: '50px',
       padding: '4px',

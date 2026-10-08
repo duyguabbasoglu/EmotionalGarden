@@ -106,6 +106,8 @@ const Kokina = () => {
         loading={loading}
         progress={progress}
         message="Çiçeğiniz hazırlanıyor..."
+        glowColor="rgba(230, 70, 90, 0.9)"
+        barStyle={{ background: '#c8102e' }}
       />
 
       <FlowersLayer bloomed={bloomed} />

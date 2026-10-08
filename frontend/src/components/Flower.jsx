@@ -1,410 +1,152 @@
 import React from 'react';
+import { CLUMP_URLS, SNOW_LEAF_URLS } from '../utils/kardelenArt';
+import { VIOLET_CLUMP_URLS, VIOLET_BLOOM_URLS, VIOLET_LEAF_URLS } from '../utils/menekseArt';
+import { JAS_SPRAY_URLS, JAS_STAR_URLS, JAS_VINE_URLS } from '../utils/yaseminArt';
+import { TULIP_URLS, TULIP_LEAF_URLS } from '../utils/laleArt';
+import { PEONY_URLS, PEONY_LEAF_URLS, PEONY_BUD_URLS } from '../utils/sakayikArt';
+import { ROSE_URLS, ROSE_LEAF_URLS, BUD_URLS } from '../utils/gulArt';
+import { LILY_URLS, LILY_LEAF_URLS, LILY_BUD_URLS } from '../utils/zambakArt';
+import { SUNFLOWER_URLS, SUN_LEAF_URLS } from '../utils/aycicegiArt';
+import { DAISY_URLS } from '../utils/papatyaArt';
+import { BRANCH_URLS, LEAF_SPRAY_URLS } from '../utils/leylakArt';
+import { CARNATION_URLS, CARN_LEAF_URLS } from '../utils/karanfilArt';
+import { MUM_URLS, MUM_LEAF_URLS } from '../utils/kasimpatiArt';
+import { CLUSTER_URLS } from '../utils/kokinaArt';
+import { DAHLIA_URLS, DAHLIA_LEAF_URLS } from '../utils/dahliaArt';
 
-const rufflePath = (r, depth, points) => {
-    const step = (Math.PI * 2) / points;
-    let d = '';
-    for (let i = 0; i <= points; i += 1) {
-        const angle = i * step;
-        const radius = r + (i % 2 === 0 ? depth : -depth);
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-        if (i === 0) {
-            d = `M ${x.toFixed(2)} ${y.toFixed(2)}`;
-        } else {
-            const mid = angle - step / 2;
-            const cx = Math.cos(mid) * (r + depth * 1.2);
-            const cy = Math.sin(mid) * (r + depth * 1.2);
-            d += ` Q ${cx.toFixed(2)} ${cy.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)}`;
-        }
-    }
-    return `${d} Z`;
+/*
+ * Every plot preview is built from the same pre-generated art the flower's
+ * full-screen scene uses, so clicking a plot never shows you something else.
+ * Layers are positioned in % of the plot; `w` is a % of its width.
+ *
+ * These are small — about eighty pixels square — so each one is composed, not
+ * just dropped in. Three rules do most of the work:
+ *
+ *  - give every preview a dark foliage layer behind the bloom, so the flower
+ *    has something to sit against instead of floating on the bed colour;
+ *  - keep the whole plant inside its own tile, at roughly two thirds of the
+ *    plot. An earlier pass let the hero bloom overflow (w above 100) to read
+ *    as confident; at twelve tiles side by side it just read as crowded, and
+ *    the garden lost the small-and-cute scale it is supposed to have. A
+ *    flower with bed showing around it looks like a flower growing in a bed;
+ *  - keep one silhouette per tile. Where a month has companions (the August
+ *    daisies, the April tulip group) they stay small and low, so the eye
+ *    still lands on one shape first.
+ */
+const PREVIEWS = {
+    "Kardelen": [
+        { src: SNOW_LEAF_URLS[0], w: 57, x: 50, y: 60 },
+        { src: CLUMP_URLS[1], w: 72, x: 50, y: 48 },
+    ],
+    "Menekşe": [
+        // the paler palette (index 4) rather than the darkest clump: a deep
+        // violet on a green bed turns into a silhouette at this size
+        { src: VIOLET_LEAF_URLS[1], w: 53, x: 50, y: 62 },
+        { src: VIOLET_CLUMP_URLS[4], w: 73, x: 50, y: 50 },
+        { src: VIOLET_BLOOM_URLS[1], w: 24, x: 34, y: 40, rot: -16 },
+        { src: VIOLET_BLOOM_URLS[4], w: 21, x: 66, y: 44, rot: 14 },
+    ],
+    "Yasemin": [
+        { src: JAS_VINE_URLS[2], w: 57, x: 50, y: 55 },
+        { src: JAS_SPRAY_URLS[3], w: 69, x: 50, y: 49 },
+        { src: JAS_STAR_URLS[1], w: 22, x: 37, y: 38, rot: 12 },
+        { src: JAS_STAR_URLS[4], w: 18, x: 63, y: 60, rot: -20 },
+    ],
+    "Lale": [
+        { src: TULIP_LEAF_URLS[2], w: 53, x: 50, y: 62 },
+        { src: TULIP_URLS[2], w: 47, x: 34, y: 51, rot: -9 },
+        { src: TULIP_URLS[8], w: 46, x: 66, y: 52, rot: 10 },
+        { src: TULIP_URLS[0], w: 55, x: 50, y: 48 },
+    ],
+    "Şakayık": [
+        { src: PEONY_LEAF_URLS[1], w: 57, x: 50, y: 60 },
+        { src: PEONY_BUD_URLS[0], w: 26, x: 67, y: 58, rot: 18 },
+        { src: PEONY_URLS[0], w: 59, x: 46, y: 46 },
+    ],
+    "Gül": [
+        { src: ROSE_LEAF_URLS[0], w: 45, x: 36, y: 60, rot: -50 },
+        { src: ROSE_LEAF_URLS[2], w: 43, x: 64, y: 61, rot: 45 },
+        { src: BUD_URLS[1], w: 24, x: 67, y: 46, rot: 22 },
+        { src: ROSE_URLS[0], w: 54, x: 46, y: 46 },
+    ],
+    "Zambak": [
+        { src: LILY_LEAF_URLS[0], w: 56, x: 50, y: 61 },
+        { src: LILY_BUD_URLS[2], w: 25, x: 69, y: 57, rot: 22 },
+        { src: LILY_URLS[0], w: 67, x: 49, y: 46 },
+    ],
+    "Ayçiçeği": [
+        { src: SUN_LEAF_URLS[0], w: 40, x: 34, y: 62, rot: -40 },
+        { src: SUN_LEAF_URLS[1], w: 37, x: 67, y: 62, rot: 40 },
+        { src: SUNFLOWER_URLS[0], w: 55, x: 50, y: 45 },
+        // the companions: small, low, tucked at the sunflower's feet
+        { src: DAISY_URLS[0], w: 14, x: 32, y: 70, rot: -12 },
+        { src: DAISY_URLS[2], w: 12, x: 45, y: 74, rot: 16 },
+        { src: DAISY_URLS[1], w: 13, x: 64, y: 72, rot: 8 },
+    ],
+    "Leylak": [
+        { src: LEAF_SPRAY_URLS[2], w: 53, x: 50, y: 61 },
+        { src: BRANCH_URLS[0], w: 69, x: 50, y: 49 },
+    ],
+    "Karanfil": [
+        { src: CARN_LEAF_URLS[0], w: 55, x: 50, y: 60 },
+        { src: CARNATION_URLS[0], w: 51, x: 50, y: 45 },
+    ],
+    "Kasımpatı": [
+        { src: MUM_LEAF_URLS[0], w: 56, x: 50, y: 58 },
+        { src: MUM_URLS[0], w: 53, x: 50, y: 45 },
+    ],
+    "Kokina": [
+        { src: CLUSTER_URLS[2], w: 70, x: 50, y: 49 },
+    ],
+    "Yıldız Çiçeği": [
+        { src: DAHLIA_LEAF_URLS[1], w: 55, x: 50, y: 58 },
+        { src: DAHLIA_URLS[0], w: 59, x: 50, y: 48 },
+    ],
 };
 
-const Flower = ({ type, onClick }) => {
-    const renderFlowerPreview = () => {
-        if (type.name === "Çiğdem") {
-            // Realistic single crocus, top-down view — fills the cell like Kokina
-            const cx = 40, cy = 42;
+/* Relative luminance of #rrggbb, so a pale flower still gets readable text */
+const luminance = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+};
 
-            // Smooth broad petal path: wide in middle, rounded tip
-            const petal = (angle, len, w, bx) => {
-                const r = angle * Math.PI / 180;
-                const c = Math.cos(r), s = Math.sin(r);
-                const T = (x, y) => `${(cx + x * c - y * s).toFixed(1)} ${(cy + x * s + y * c).toFixed(1)}`;
-                return `M ${cx} ${cy} ` +
-                    `C ${T(w * 0.65 + bx, -len * 0.08)} ${T(w * 0.85 + bx, -len * 0.46)} ${T(w * 0.3 + bx, -len * 0.94)} ` +
-                    `Q ${T(bx * 0.4, -len * 1.06)} ${T(-w * 0.3 + bx, -len * 0.94)} ` +
-                    `C ${T(-w * 0.85 + bx, -len * 0.46)} ${T(-w * 0.65 + bx, -len * 0.08)} ${cx} ${cy} Z`;
-            };
+/* The darker of the flower's two colours, or plain grey if both are pale */
+const labelColor = ({ primary, secondary }) => {
+    const best = luminance(primary) <= luminance(secondary) ? primary : secondary;
+    return luminance(best) > 0.62 ? '#6b6b6b' : best;
+};
 
-            // Outer 3 petals (bigger) + inner 3 petals (slightly smaller, offset 60°)
-            const outerPetals = [0, 120, 240].map(a => ({ angle: a - 90, len: 21, w: 7.5, bx: (a % 240 === 0 ? 0.5 : -0.5) }));
-            const innerPetals = [60, 180, 300].map(a => ({ angle: a - 90, len: 18, w: 6, bx: (a % 180 === 0 ? -0.4 : 0.4) }));
-
-            return (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                    <svg viewBox="0 0 80 80" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
-                        <defs>
-                            <radialGradient id="cigGO" cx="35%" cy="25%" r="75%">
-                                <stop offset="0%" stopColor="#a86ae0" />
-                                <stop offset="55%" stopColor="#6a0dad" />
-                                <stop offset="100%" stopColor="#3a0060" />
-                            </radialGradient>
-                            <radialGradient id="cigGI" cx="35%" cy="25%" r="75%">
-                                <stop offset="0%" stopColor="#c090f0" />
-                                <stop offset="55%" stopColor="#8530cc" />
-                                <stop offset="100%" stopColor="#4a0080" />
-                            </radialGradient>
-                            <radialGradient id="cigGC" cx="50%" cy="40%" r="70%">
-                                <stop offset="0%" stopColor="#fff9c4" />
-                                <stop offset="45%" stopColor="#ffcc00" />
-                                <stop offset="100%" stopColor="#e65100" />
-                            </radialGradient>
-                        </defs>
-
-                        {/* Outer petals */}
-                        {outerPetals.map((p, i) => (
-                            <g key={`o-${i}`} style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' }}>
-                                {/* vein */}
-                                <line
-                                    x1={cx} y1={cy}
-                                    x2={(cx + Math.cos((p.angle) * Math.PI / 180) * 17).toFixed(1)}
-                                    y2={(cy + Math.sin((p.angle) * Math.PI / 180) * 17).toFixed(1)}
-                                    stroke="#2d005a" strokeWidth="0.5" opacity="0.4"
-                                />
-                                <path d={petal(p.angle, p.len, p.w, p.bx)}
-                                    fill="url(#cigGO)" stroke="#2a0055" strokeWidth="0.35" opacity="0.96" />
-                            </g>
-                        ))}
-                        {/* Inner petals */}
-                        {innerPetals.map((p, i) => (
-                            <g key={`i-${i}`} style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.3))' }}>
-                                <line
-                                    x1={cx} y1={cy}
-                                    x2={(cx + Math.cos((p.angle) * Math.PI / 180) * 14).toFixed(1)}
-                                    y2={(cy + Math.sin((p.angle) * Math.PI / 180) * 14).toFixed(1)}
-                                    stroke="#350070" strokeWidth="0.4" opacity="0.35"
-                                />
-                                <path d={petal(p.angle, p.len, p.w, p.bx)}
-                                    fill="url(#cigGI)" stroke="#2a0055" strokeWidth="0.3" opacity="0.97" />
-                            </g>
-                        ))}
-
-                        {/* Stamens */}
-                        {[0, 120, 240].map((a, i) => {
-                            const r = a * Math.PI / 180;
-                            const sx = cx + Math.cos(r) * 5;
-                            const sy = cy + Math.sin(r) * 5;
-                            return (
-                                <g key={`st-${i}`}>
-                                    <line x1={cx} y1={cy} x2={sx} y2={sy}
-                                        stroke="#e8a020" strokeWidth="1.2" strokeLinecap="round" />
-                                    <ellipse cx={sx} cy={sy} rx="1.5" ry="2"
-                                        fill="#ff7000"
-                                        transform={`rotate(${a} ${sx} ${sy})`} />
-                                </g>
-                            );
-                        })}
-                        {/* Pistil center */}
-                        <circle cx={cx} cy={cy} r="3" fill="url(#cigGC)"
-                            style={{ filter: 'drop-shadow(0 0 3px rgba(255,150,0,0.6))' }} />
-                    </svg>
-                </div>
-            );
-        }
-
-        if (type.name === "Karanfil") {
-            const outer = rufflePath(18, 3, 16);
-            const mid = rufflePath(13, 2.5, 14);
-            const inner = rufflePath(8, 2, 12);
-
-            return (
-                <div style={{
-                    position: 'absolute',
-                    top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%) scale(0.7)',
-                    pointerEvents: 'none'
-                }}>
-                    {/* stem */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '-26px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: '4px',
-                        height: '40px',
-                        background: 'linear-gradient(to top, #2f5f3b, #9ed5a1)',
-                        borderRadius: '999px',
-                        zIndex: 1
-                    }} />
-
-                    {/* leaves */}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '-20px',
-                        left: '-10px',
-                        width: '7px',
-                        height: '38px',
-                        background: 'linear-gradient(to top, #2c5a38, #9cd7a3)',
-                        borderRadius: '20px',
-                        transform: 'rotate(-28deg)',
-                        zIndex: 1
-                    }} />
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '-18px',
-                        right: '-8px',
-                        width: '7px',
-                        height: '34px',
-                        background: 'linear-gradient(to top, #2c5a38, #a4ddaa)',
-                        borderRadius: '20px',
-                        transform: 'rotate(24deg)',
-                        zIndex: 1
-                    }} />
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '-16px',
-                        left: '-2px',
-                        width: '6px',
-                        height: '30px',
-                        background: 'linear-gradient(to top, #2c5a38, #9cd7a3)',
-                        borderRadius: '20px',
-                        transform: 'rotate(6deg)',
-                        zIndex: 1
-                    }} />
-
-                    {/* bloom */}
-                    <svg
-                        width="56"
-                        height="56"
-                        viewBox="-30 -30 60 60"
-                        style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}
-                    >
-                        <defs>
-                            <radialGradient id="miniOuter" cx="40%" cy="20%" r="80%">
-                                <stop offset="0%" stopColor="#ffe0e6" />
-                                <stop offset="60%" stopColor="#f1a7b3" />
-                                <stop offset="100%" stopColor="#d84b5f" />
-                            </radialGradient>
-                            <radialGradient id="miniMid" cx="45%" cy="25%" r="75%">
-                                <stop offset="0%" stopColor="#ffd6df" />
-                                <stop offset="60%" stopColor="#e98da0" />
-                                <stop offset="100%" stopColor="#c53a52" />
-                            </radialGradient>
-                            <radialGradient id="miniInner" cx="50%" cy="30%" r="70%">
-                                <stop offset="0%" stopColor="#fff1f4" />
-                                <stop offset="70%" stopColor="#f4c3cb" />
-                                <stop offset="100%" stopColor="#d58395" />
-                            </radialGradient>
-                        </defs>
-                        <g transform="scale(1,0.92)">
-                            <path d={outer} fill="url(#miniOuter)" />
-                            <path d={mid} fill="url(#miniMid)" />
-                            <path d={inner} fill="url(#miniInner)" />
-                        </g>
-                    </svg>
-                </div>
-            );
-        }
-        if (type.name === "Karanfil") {
-            const ruffledCircle = (cx, cy, r, seed) => {
-                let d = '';
-                const numPoints = 24;
-                for (let i = 0; i < numPoints; i++) {
-                    const angle = (i / numPoints) * Math.PI * 2;
-                    const noise = Math.sin(i * 3.5 + seed) * (r * 0.15) + Math.cos(i * 7.2 + seed) * (r * 0.1);
-                    const rr = r + noise;
-                    const x = cx + Math.cos(angle) * rr;
-                    const y = cy + Math.sin(angle) * rr;
-                    if (i === 0) d += `M ${x} ${y}`;
-                    else d += ` L ${x} ${y}`;
-                }
-                return d + ' Z';
-            };
-
-            const carnations = [
-                { cx: 35, cy: 30, r: 12, fill: '#d90429', seed: 1 }, // Red
-                { cx: 50, cy: 35, r: 10, fill: '#ffb6c1', seed: 2 }, // Pink
-                { cx: 28, cy: 45, r: 11, fill: '#ff69b4', seed: 3 }, // Fuchsia
-                { cx: 45, cy: 52, r: 13, fill: '#fff59d', seed: 4 }, // Pale Yellow
-                { cx: 38, cy: 40, r: 14, fill: '#ff8c69', seed: 5 }, // Salmon
-            ];
-
-            return (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                    <svg viewBox="0 0 80 80" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
-                        <g transform="scale(0.8) translate(10, 10)">
-                            {/* Leaves */}
-                            <ellipse cx="30" cy="30" rx="15" ry="5" fill="#2d6a4f" transform="rotate(-20 30 30)" opacity="0.9"/>
-                            <ellipse cx="50" cy="50" rx="16" ry="6" fill="#1b4332" transform="rotate(35 50 50)" opacity="0.9"/>
-
-                            {carnations.map((c, i) => (
-                                <g key={`carn-${i}`} style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))' }}>
-                                    <path d={ruffledCircle(c.cx, c.cy, c.r, c.seed)} fill={c.fill} />
-                                    <path d={ruffledCircle(c.cx, c.cy, c.r * 0.7, c.seed + 1)} fill="#ffffff" opacity="0.25" />
-                                    <path d={ruffledCircle(c.cx, c.cy, c.r * 0.4, c.seed + 2)} fill="#ffffff" opacity="0.4" />
-                                </g>
-                            ))}
-                        </g>
-                    </svg>
-                </div>
-            );
-        }
-
-        if (type.name === "Nergis") {
-            const buds = [
-                { cx: 28, cy: 30, r: 10 },
-                { cx: 50, cy: 22, r: 8.5 },
-                { cx: 42, cy: 44, r: 9 },
-            ];
-            const petalD = (cx, cy, r) => {
-                const pl = r * 1.7;
-                const pw = r * 0.62;
-                return [0, 60, 120, 180, 240, 300].map(angle => {
-                    const rad = (angle * Math.PI) / 180;
-                    const cos = Math.cos(rad), sin = Math.sin(rad);
-                    const rot = (x, y) => [cx + x * cos - y * sin, cy + x * sin + y * cos];
-                    const [c1x, c1y] = rot(pw, -pl * 0.07);
-                    const [c2x, c2y] = rot(pw * 0.88, -pl * 0.70);
-                    const [ex, ey]   = rot(0, -pl);
-                    const [c3x, c3y] = rot(-pw * 0.88, -pl * 0.70);
-                    const [c4x, c4y] = rot(-pw, -pl * 0.07);
-                    return `M ${cx} ${cy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey} C ${c3x} ${c3y}, ${c4x} ${c4y}, ${cx} ${cy} Z`;
-                });
-            };
-            return (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                    <svg viewBox="0 0 80 80" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
-                        <defs>
-                            <radialGradient id="nYellow" cx="40%" cy="20%" r="90%">
-                                <stop offset="0%" stopColor="#fff97a" />
-                                <stop offset="40%" stopColor="#ffe033" />
-                                <stop offset="100%" stopColor="#c49000" />
-                            </radialGradient>
-                            <radialGradient id="nYellow2" cx="55%" cy="25%" r="85%">
-                                <stop offset="0%" stopColor="#fff59d" />
-                                <stop offset="40%" stopColor="#ffd000" />
-                                <stop offset="100%" stopColor="#b37a00" />
-                            </radialGradient>
-                            <radialGradient id="nTrumpet" cx="50%" cy="35%" r="70%">
-                                <stop offset="0%" stopColor="#ffcc66" />
-                                <stop offset="50%" stopColor="#ff8800" />
-                                <stop offset="100%" stopColor="#c44000" />
-                            </radialGradient>
-                        </defs>
-                        {buds.map((b, bi) =>
-                            petalD(b.cx, b.cy, b.r).map((path, j) => (
-                                <path key={`p-${bi}-${j}`} d={path}
-                                    fill={j % 2 === 0 ? 'url(#nYellow)' : 'url(#nYellow2)'}
-                                    stroke="rgba(140,90,0,0.18)" strokeWidth="0.3"
-                                    style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }} />
-                            ))
-                        )}
-                        {buds.map((b, i) => (
-                            <g key={`t-${i}`}>
-                                <ellipse cx={b.cx} cy={b.cy} rx={b.r * 0.40} ry={b.r * 0.48}
-                                    fill="url(#nTrumpet)" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }} />
-                                <ellipse cx={b.cx} cy={b.cy} rx={b.r * 0.18} ry={b.r * 0.20}
-                                    fill="#c03000" opacity="0.80" />
-                            </g>
-                        ))}
-                    </svg>
-                </div>
-            );
-        }
-
-        if (type.name === "Papatya") {
-            const buds = [
-                { cx: 35, cy: 30, r: 8.5 },
-                { cx: 50, cy: 35, r: 10 },
-                { cx: 28, cy: 45, r: 9 },
-                { cx: 45, cy: 52, r: 11 },
-                { cx: 38, cy: 40, r: 12 }, // Center/top flower drawn last
-            ];
-            
-            const pPetalD = (cx, cy, r) => {
-                const pl = r * 1.5;
-                const pw = r * 0.35;
-                return Array.from({ length: 16 }, (_, i) => (360 / 16) * i).map(angle => {
-                    const rad = (angle * Math.PI) / 180;
-                    const cos = Math.cos(rad), sin = Math.sin(rad);
-                    const rot = (x, y) => [cx + x * cos - y * sin, cy + x * sin + y * cos];
-                    const [c1x, c1y] = rot(pw * 0.55, -pl * 0.06);
-                    const [c2x, c2y] = rot(pw * 0.80, -pl * 0.60);
-                    const [ex, ey]   = rot(pw * 0.42, -pl);
-                    const [tx, ty]   = rot(-pw * 0.42, -pl);
-                    const [c3x, c3y] = rot(-pw * 0.80, -pl * 0.60);
-                    const [c4x, c4y] = rot(-pw * 0.55, -pl * 0.06);
-                    return `M ${cx} ${cy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey} Q ${rot(0, -pl*1.07)[0]} ${rot(0, -pl*1.07)[1]}, ${tx} ${ty} C ${c3x} ${c3y}, ${c4x} ${c4y}, ${cx} ${cy} Z`;
-                });
-            };
-            
-            return (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-                    <svg viewBox="0 0 80 80" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' }}>
-                        <g transform="scale(0.8) translate(10, 10)">
-                            {/* Optional: Add a couple of dark green leaves beneath the cluster */}
-                            <ellipse cx="30" cy="30" rx="15" ry="6" fill="#558b2f" transform="rotate(-30 30 30)" opacity="0.8"/>
-                            <ellipse cx="50" cy="50" rx="18" ry="7" fill="#33691e" transform="rotate(45 50 50)" opacity="0.8"/>
-
-                            {buds.map((b, bi) =>
-                                pPetalD(b.cx, b.cy, b.r).map((path, j) => (
-                                    <path key={`dp-${bi}-${j}`} d={path}
-                                        fill={j % 2 === 0 ? '#ffffff' : '#fcfcfc'}
-                                        stroke="rgba(160,160,160,0.15)" strokeWidth="0.25"
-                                        style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.15))' }} />
-                                ))
-                            )}
-                            {buds.map((b, i) => (
-                                <g key={`dt-${i}`}>
-                                    <ellipse cx={b.cx} cy={b.cy} rx={b.r * 0.35} ry={b.r * 0.35}
-                                        fill="#fbc02d" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }} />
-                                    <ellipse cx={b.cx - b.r * 0.08} cy={b.cy - b.r * 0.08} rx={b.r * 0.15} ry={b.r * 0.15}
-                                        fill="#fff59d" opacity="0.8" />
-                                </g>
-                            ))}
-                        </g>
-                    </svg>
-                </div>
-            );
-        }
-
-        // Default: Kokina preview (berries)
-        return (
-            <div style={{
+/* Stacked layers of pre-built flower art, positioned in % of the plot */
+const artPreview = (layers) => (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        {layers.map((l, i) => (
+            <img key={i} src={l.src} alt="" draggable={false} style={{
                 position: 'absolute',
-                top: '50%', left: '50%',
-                transform: 'translate(-50%, -50%) scale(0.25) rotate(-15deg)',
-                pointerEvents: 'none'
-            }}>
-                {/* leaves */}
-                {[...Array(5)].map((_, i) => (
-                    <div key={`leaf-${i}`} style={{
-                        position: 'absolute',
-                        width: '60px', height: '20px',
-                        background: 'linear-gradient(to right, #1a472a, #2d6a4f)',
-                        borderRadius: '80% 0 80% 0',
-                        transformOrigin: 'center left',
-                        transform: `rotate(${i * 72}deg) translateX(10px)`,
-                        boxShadow: '1px 1px 3px rgba(0,0,0,0.2)'
-                    }} />
-                ))}
-                {/* fruits */}
-                <div style={{ position: 'relative', zIndex: 2 }}>
-                    {[...Array(7)].map((_, i) => (
-                        <div key={`berry-${i}`} style={{
-                            position: 'absolute',
-                            width: '18px', height: '18px',
-                            borderRadius: '50%',
-                            background: 'radial-gradient(circle at 30% 30%, #ff4d4d 0%, #d90429 60%)',
-                            transform: `translate(${Math.cos(i) * 15}px, ${Math.sin(i) * 15}px)`,
-                            boxShadow: '1px 1px 5px rgba(0,0,0,0.3)'
-                        }} />
-                    ))}
-                </div>
-            </div>
-        );
-    };
+                left: `${l.x}%`, top: `${l.y}%`,
+                width: `${l.w}%`,
+                transform: `translate(-50%, -50%) rotate(${l.rot || 0}deg)`,
+                filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.26))',
+            }} />
+        ))}
+    </div>
+);
+
+/*
+ * Neutral placeholder for a flower with no preview yet — deliberately not any
+ * real flower, so an unfinished entry can never be mistaken for a finished one.
+ */
+const placeholder = () => (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <svg viewBox="0 0 80 80" width="100%" height="100%" style={{ display: 'block' }}>
+            <path d="M 40 64 L 40 40" stroke="#3f6b35" strokeWidth="3" strokeLinecap="round" />
+            <path d="M 40 48 C 30 46, 24 38, 26 30 C 35 31, 40 39, 40 48 Z" fill="#5f9150" opacity="0.9" />
+            <path d="M 40 44 C 50 42, 56 34, 54 26 C 45 27, 40 35, 40 44 Z" fill="#6ea35c" opacity="0.9" />
+        </svg>
+    </div>
+);
+
+const Flower = ({ type, onClick }) => {
+    const layers = PREVIEWS[type.name];
 
     return (
         <div
@@ -416,17 +158,23 @@ const Flower = ({ type, onClick }) => {
                 animation: 'float 3s ease-in-out infinite'
             }}
         >
-            {renderFlowerPreview()}
+            {layers ? artPreview(layers) : placeholder()}
 
             {/* chatbox */}
             <div className="chatbox">
                 <strong style={{
-                    display: 'block', fontSize: '14px', marginBottom: '4px',
-                    color: type.name === "Çiğdem" ? '#6a0dad' : type.name === "Karanfil" ? '#a63b50' : type.name === "Nergis" ? '#b37a00' : type.name === "Papatya" ? '#e89500' : '#d90429'
+                    display: 'block', fontSize: '15px', marginBottom: '2px',
+                    color: labelColor(type.colors)
                 }}>
                     {type.name}
                 </strong>
-                <span style={{ fontSize: '11px', color: '#555', lineHeight: '1.2', display: 'block' }}>
+                <span style={{
+                    display: 'block', fontSize: '10px', letterSpacing: '0.08em',
+                    textTransform: 'uppercase', color: '#9a9a9a', marginBottom: '6px'
+                }}>
+                    {type.month}
+                </span>
+                <span style={{ fontSize: '11px', color: '#555', lineHeight: '1.3', display: 'block' }}>
                     {type.description}
                 </span>
             </div>
@@ -435,15 +183,15 @@ const Flower = ({ type, onClick }) => {
             <style>{`
         .chatbox {
           position: absolute;
-          bottom: 80%; 
+          bottom: 80%;
           left: 50%;
           transform: translateX(-50%) scale(0.5);
-          width: 160px;
-          background: #fff;
+          width: 170px;
+          background: #fffdf9;
           color: #333;
           padding: 12px;
           border-radius: 12px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.35);
           text-align: center;
           font-family: 'Segoe UI', sans-serif;
           pointer-events: none;
@@ -459,7 +207,7 @@ const Flower = ({ type, onClick }) => {
           margin-left: -6px;
           border-width: 6px;
           border-style: solid;
-          border-color: #fff transparent transparent transparent;
+          border-color: #fffdf9 transparent transparent transparent;
         }
 
         .flower-container:hover .chatbox {

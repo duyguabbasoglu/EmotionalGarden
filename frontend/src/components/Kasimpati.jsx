@@ -1,223 +1,76 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React from 'react';
+import FlowerLoader from './FlowerLoader';
+import ArtScene from './ArtScene';
+import { useFlowerGrowth } from '../hooks/useFlowerGrowth';
+import { sr, pick, coverGrid } from '../utils/svgArt';
+import { MUM_URLS, MUM_SPRAY_URLS, MUM_LEAF_URLS } from '../utils/kasimpatiArt';
 
-// Yardımcı Fonksiyon
-const random = (min, max) => Math.random() * (max - min) + min;
+/*
+ * An October chrysanthemum bed: lobed foliage underneath, leafy sprays of
+ * two or three heads through the middle, and the big double heads themselves
+ * crowding the frame in plum, magenta and autumn gold.
+ */
+const LEAVES = coverGrid({ cols: 16, rows: 11, seed: 27100 }).map((c, i) => ({
+  id: `l-${i}`,
+  x: c.x, y: c.y,
+  scale: 0.75 + sr(c.s + 3) * 0.61,
+  rotation: sr(c.s + 4) * 360,
+  delay: sr(c.s + 5) * 1.4,
+  zIndex: 1 + Math.floor(sr(c.s + 6) * 10),
+  src: pick(MUM_LEAF_URLS, c.s + 7),
+}));
 
-// --- 1. KASIMPATI ÇİÇEĞİ KATMANI (MEMOIZED) ---
-// Bu katman, React tarafından hafızaya alınır ve bar dolarken titremez.
-const FlowersLayer = React.memo(({ bloomed }) => {
-  
-  // 150 adet Kasımpatı (Karmaşık oldukları için sayı ideal, boyut büyük)
-  const flowers = useMemo(() => {
-    return [...Array(150)].map((_, i) => ({
-      id: i,
-      x: random(-20, 120),
-      y: random(-20, 120),
-      scale: random(0.6, 1.2), // Kasımpatı büyük bir çiçektir
-      rotation: random(0, 360),
-      delay: i * 0.015, // Sırayla açılma hızı
-      // Her çiçeğin kendi "rüzgar" hızı olsun
-      swayDuration: random(3, 6), 
-      swayDelay: random(0, 2)
-    }));
-  }, []);
+const SPRAYS = [
+  ...coverGrid({ cols: 14, rows: 9, seed: 27600 }),
+  ...coverGrid({ cols: 9, rows: 7, seed: 28100 }),
+].map((c, i) => ({
+  id: `s-${i}`,
+  x: c.x, y: c.y,
+  scale: 0.51 + sr(c.s + 3) * 0.48,
+  rotation: (sr(c.s + 4) - 0.5) * 40,
+  delay: 0.2 + sr(c.s + 5) * 2.4,
+  zIndex: 20 + Math.floor(sr(c.s + 6) * 70),
+  src: pick(MUM_SPRAY_URLS, c.s + 7),
+}));
 
-  return (
-    <>
-      {flowers.map((flower) => (
-        <div key={flower.id} style={{
-          position: 'absolute',
-          left: `${flower.x}%`, top: `${flower.y}%`,
-          zIndex: Math.floor(random(1, 50)),
-          
-          // Açılma (Bloom) Animasyonu
-          transform: bloomed 
-            ? `translate(-50%, -50%) scale(${flower.scale})` 
-            : `translate(-50%, -50%) scale(0)`,
-          opacity: bloomed ? 1 : 0,
-          transition: `transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${flower.delay}s, opacity 0.8s ease ${flower.delay}s`,
-        }}>
-          
-          {/* --- SALLANMA (RÜZGAR) EFEKTİ --- */}
-          <div style={{
-            animation: `sway ${flower.swayDuration}s ease-in-out infinite alternate ${flower.swayDelay}s`,
-            transformOrigin: 'bottom center'
-          }}>
+const HEADS = [
+  ...coverGrid({ cols: 15, rows: 9, seed: 28600 }),
+  ...coverGrid({ cols: 9, rows: 5, seed: 29100 }),
+].map((c, i) => ({
+  id: `h-${i}`,
+  x: c.x, y: c.y,
+  scale: 0.27 + sr(c.s + 3) * 0.33,
+  rotation: sr(c.s + 4) * 360,
+  delay: 0.4 + sr(c.s + 5) * 2.5,
+  zIndex: 95 + Math.floor(sr(c.s + 6) * 80),
+  src: pick(MUM_URLS, c.s + 7),
+}));
 
-            {/* --- YAPRAKLAR (GÖVDE) --- */}
-            {/* Kasımpatı yaprakları dişlidir, burada sivri yeşil yapraklar kullanıyoruz */}
-            {[...Array(5)].map((_, i) => (
-              <div key={`leaf-${i}`} style={{
-                position: 'absolute',
-                top: '20px', left: '50%',
-                width: '60px', height: '25px',
-                background: 'linear-gradient(45deg, #1b5e20, #4caf50)',
-                borderRadius: '0 80% 0 80%',
-                transformOrigin: 'center left',
-                transform: `translateX(-50%) rotate(${i * 72 + random(0, 30)}deg) translateY(10px)`,
-                boxShadow: '1px 1px 5px rgba(0,0,0,0.3)',
-                zIndex: 0
-              }} />
-            ))}
+const SCENE = [...LEAVES, ...SPRAYS, ...HEADS];
 
-            {/* --- ÇİÇEK BAŞI (KATMERLİ YAPI) --- */}
-            {/* 3 Katmanlı Yaprak Dizilimi: Dış, Orta, İç */}
-            <div style={{ position: 'relative', zIndex: 10 }}>
-              
-              {/* KATMAN 1: DIŞ YAPRAKLAR (Koyu Mor - Geniş) */}
-              {[...Array(12)].map((_, i) => (
-                <div key={`petal-outer-${i}`} style={{
-                  position: 'absolute',
-                  top: '50%', left: '50%',
-                  width: '80px', height: '18px', // Uzun yapraklar
-                  background: 'linear-gradient(to right, #4a148c, #7b1fa2)', // Koyu Mor
-                  borderRadius: '50% 50% 50% 0', // Damla şekli
-                  transformOrigin: 'left center',
-                  transform: `translate(-10%, -50%) rotate(${i * 30}deg)`,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.4)'
-                }} />
-              ))}
-
-              {/* KATMAN 2: ORTA YAPRAKLAR (Magenta - Daha Kısa ve Sık) */}
-              {[...Array(10)].map((_, i) => (
-                <div key={`petal-mid-${i}`} style={{
-                  position: 'absolute',
-                  top: '50%', left: '50%',
-                  width: '60px', height: '14px',
-                  background: 'linear-gradient(to right, #7b1fa2, #d500f9)', // Canlı Magenta
-                  borderRadius: '50% 50% 50% 0',
-                  transformOrigin: 'left center',
-                  // Dış katmanla arasına girsin diye +15 derece offset
-                  transform: `translate(-10%, -50%) rotate(${i * 36 + 15}deg)`,
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }} />
-              ))}
-
-              {/* KATMAN 3: İÇ TOHUMLAR (Sarı Göbek) */}
-              <div style={{
-                position: 'absolute',
-                top: '50%', left: '50%',
-                width: '24px', height: '24px',
-                transform: 'translate(-50%, -50%)',
-                background: 'radial-gradient(circle, #ffeb3b 20%, #fbc02d 100%)', // Altın Sarısı
-                borderRadius: '50%',
-                boxShadow: '0 0 10px rgba(255, 235, 59, 0.6)', // Hafif parıltı
-                zIndex: 20
-              }}>
-                 {/* Göbek dokusu (noktalar) */}
-                 <div style={{
-                   width: '100%', height: '100%',
-                   backgroundImage: 'radial-gradient(#f57f17 15%, transparent 16%)',
-                   backgroundSize: '6px 6px'
-                 }}/>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      ))}
-      
-      {/* RÜZGAR ANİMASYONU CSS */}
-      <style>{`
-        @keyframes sway {
-          0% { transform: rotate(-5deg); }
-          100% { transform: rotate(5deg); }
-        }
-      `}</style>
-    </>
-  );
-});
-
-// --- 2. ANA KOMPONENT (YÜKLEME EKRANI) ---
 const Kasimpati = () => {
-  const [bloomed, setBloomed] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    // 1. Tıklar tıklamaz arkada başlasın
-    setTimeout(() => setBloomed(true), 10);
-
-    // 2. Yükleme Barı (4 Saniye - Kasımpatı Detaylı Olduğu İçin Bir Tık Uzun Hissi)
-    const duration = 4000; 
-    const intervalTime = 40; 
-    const steps = duration / intervalTime;
-    let currentStep = 0;
-
-    const interval = setInterval(() => {
-      currentStep++;
-      const newProgress = Math.min((currentStep / steps) * 100, 100);
-      setProgress(newProgress);
-
-      if (currentStep >= steps) {
-        clearInterval(interval);
-        setTimeout(() => setLoading(false), 300); 
-      }
-    }, intervalTime);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { bloomed, loading, progress } = useFlowerGrowth(3800);
 
   return (
-    <div style={{ 
-      position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' 
+    <div style={{
+      position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none',
+      background: 'radial-gradient(ellipse at 50% 50%, #3b2440 0%, #2a1a2e 45%, #190f1e 85%, #0c0711 100%)',
     }}>
-      
-      {/* === YÜKLEME EKRANI (Senin Sevdiğin Beyaz Rounded Bar) === */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        zIndex: 9999,
-        background: 'rgba(0, 0, 0, 0.3)', 
-        backdropFilter: 'blur(8px)', 
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-        opacity: loading ? 1 : 0,
-        transition: 'opacity 0.6s ease',
-        pointerEvents: loading ? 'auto' : 'none'
-      }}>
-        
-        {/* Başlık: Morumsu/Beyaz Neon */}
-        <h2 style={{
-          fontFamily: "'VT323', monospace",
-          color: '#fff', fontSize: '38px', letterSpacing: '3px',
-          margin: '0 0 20px 0', 
-          textShadow: '0 0 15px rgba(213, 0, 249, 0.8)' // Magenta Neon
-        }}>
-          Kasımpatı bahçesi hazırlanıyor...
-        </h2>
+      {/* Autumn: plum shade, low gold light, rust in the foliage */}
+      <div style={{ position: 'absolute', top: '-8%', right: '12%', width: '560px', height: '510px', background: '#8e2a9c', borderRadius: '50%', filter: 'blur(150px)', opacity: 0.24 }} />
+      <div style={{ position: 'absolute', bottom: '-6%', left: '18%', width: '600px', height: '430px', background: '#4a3a16', borderRadius: '50%', filter: 'blur(130px)', opacity: 0.45 }} />
+      <div style={{ position: 'absolute', top: '42%', left: '-6%', width: '430px', height: '430px', background: '#e09018', borderRadius: '50%', filter: 'blur(150px)', opacity: 0.16 }} />
+      <div style={{ position: 'absolute', top: '14%', left: '26%', width: '420px', height: '420px', background: '#6a46c0', borderRadius: '50%', filter: 'blur(140px)', opacity: 0.16 }} />
 
-        {/* PROGRESS BAR: BEYAZ & ROUNDED */}
-        <div style={{
-          width: '350px', height: '30px',
-          border: '3px solid #fff', 
-          borderRadius: '50px', 
-          padding: '4px', 
-          background: 'rgba(0,0,0,0.5)', 
-          boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-        }}>
-          
-          {/* DOLAN KISIM: DÜZ BEYAZ */}
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            borderRadius: '50px', 
-            background: '#fff', 
-            boxShadow: '0 0 15px rgba(255, 255, 255, 0.9)', 
-            transition: 'width 0.04s linear' 
-          }} />
-        </div>
-        
-        <div style={{ 
-          color: '#fff', marginTop: '15px', 
-          fontFamily: "'VT323', monospace", fontSize: '22px',
-          textShadow: '0 0 5px #fff'
-        }}>
-          %{Math.floor(progress)}
-        </div>
-      </div>
+      <FlowerLoader
+        loading={loading}
+        progress={progress}
+        message="Kasımpatılar renkleniyor..."
+        glowColor="rgba(220, 130, 240, 0.9)"
+        barStyle={{ background: '#e08a2e' }}
+      />
 
-      {/* === ÇİÇEKLER KATMANI === */}
-      <FlowersLayer bloomed={bloomed} />
-
+      <ArtScene items={SCENE} bloomed={bloomed} />
     </div>
   );
 };

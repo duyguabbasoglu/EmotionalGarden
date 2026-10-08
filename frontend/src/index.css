@@ -19,7 +19,34 @@ body {
   align-items: center;
   min-height: 100vh;
   overflow: hidden;
-  image-rendering: pixelated;
+}
+
+/*
+ * The flower art is smooth vector work, not pixel art. It used to inherit a
+ * global `image-rendering: pixelated`, which resampled every petal with
+ * nearest-neighbour and was the single biggest reason the garden read as
+ * cheap game asset rather than botanical illustration.
+ */
+img {
+  image-rendering: auto;
+}
+
+/*
+ * The page is exactly one screen tall and never scrolls vertically. The title
+ * used to sit above a child that was itself 100vh, so the two together were
+ * taller than the window and `overflow: hidden` on the body quietly cut the
+ * bottom row of beds off on short or narrow screens.
+ */
+#root {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .pixel-panel {
